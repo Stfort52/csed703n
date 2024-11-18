@@ -1,0 +1,37 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+          "label": "Install",
+          "type": "shell",
+          "command": "python",
+          "args": ["-m", "pip", "install", "-e", ".[dev]"],
+          "presentation": {
+            "reveal": "always"
+          },
+          "problemMatcher": []
+        },
+        {
+          "label": "Launch Pretraining",
+          "type": "shell",
+          "command": "python",
+          "args": ["-m", "csed703n.train.pretrain"],
+          "presentation": {
+            "reveal": "always"
+          },
+          "problemMatcher": []
+        },
+        {
+          "label": "Launch Tensorboard",
+          "type": "shell",
+          "command": "tensorboard",
+          "args": ["--logdir", "checkpoints/lightning_logs"],
+          "presentation": {
+            "reveal": "always"
+          },
+          "problemMatcher": []
+        }
+    ]
+}
