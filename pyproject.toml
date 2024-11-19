@@ -9,7 +9,7 @@ authors = [
     { name = "Jaehoon Baek", email = "52439950+Stfort52@users.noreply.github.com"},
 ]
 dependencies = [
-    "torch>=2.4.0",
+    "torch>=2.4.0, <2.5.0",
     "datasets",
     "lightning>=2.2.3",
     "torchmetrics",
