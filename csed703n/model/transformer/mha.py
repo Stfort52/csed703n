@@ -1,6 +1,9 @@
 import einops
 from torch import Tensor, nn
 
+from ..pe import BaseRPE
+from ..utils import pe_from_name
+
 
 class MHA(nn.Module):
     def __init__(
@@ -9,6 +12,7 @@ class MHA(nn.Module):
         num_heads: int,
         dropout: float = 0.0,
         relative_pe: str | None = None,
+        relative_pe_kwargs: dict = {},
     ):
         super(MHA, self).__init__()
 
@@ -24,14 +28,18 @@ class MHA(nn.Module):
 
         self.dropout = nn.Dropout(dropout)
 
-        self.scale = embed_size**-0.5
-
         if relative_pe is not None:
-            self.relative_pe = self._relative_positional_encoding(relative_pe)
+            relative_pe_kwargs.setdefault("embed_size", embed_size)
+            pe_type = pe_from_name(relative_pe)
+            self.relative_pe = (
+                pe_type(**relative_pe_kwargs) if issubclass(pe_type, BaseRPE) else None
+            )
         else:
             self.relative_pe = None
 
-    def forward(self, x: Tensor) -> Tensor:
+        self.scale = embed_size**-0.5
+
+    def forward(self, x: Tensor, mask: Tensor | None) -> Tensor:
         Q = einops.rearrange(self.W_q(x), "b n (h d) -> b h n d", h=self.num_heads)
         K = einops.rearrange(self.W_k(x), "b n (h d) -> b h n d", h=self.num_heads)
         V = einops.rearrange(self.W_v(x), "b n (h d) -> b h n d", h=self.num_heads)
@@ -39,15 +47,16 @@ class MHA(nn.Module):
 
         if self.relative_pe is not None:
             P = self.relative_pe(x)  # [i j d]
-            A += einops.einsum(Q, P, "b h i d, i j d -> b h i j")
+            if self.relative_pe.coupled:
+                A += einops.einsum(Q, P, "b h i d, i j d -> b h i j")
+            else:
+                A += P
+
+        if mask is not None:
+            A = A.masked_fill(mask == 0, float("-inf"))
 
         S = self.dropout(A.softmax(dim=-1))
 
         O = einops.einsum(S, V, "b h i j, b h j d -> b h i d")
 
         return self.W_o(einops.rearrange(O, "b h n d -> b n (h d)"))
-
-    @staticmethod
-    def _relative_positional_encoding(name: str) -> nn.Module:
-        # TODO: Implement relative positional encoding
-        raise NotImplementedError(":(")

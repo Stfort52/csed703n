@@ -15,7 +15,8 @@ class Encoder(nn.Module):
         attn_dropout: float,
         ff_dropout: float,
         norm: Literal["pre", "post"],
-        relative_pe: str | None,
+        relative_pe: str | None = None,
+        relative_pe_kwargs: dict = {},
     ):
         super(Encoder, self).__init__()
         self.d_model = d_model
@@ -30,11 +31,12 @@ class Encoder(nn.Module):
                 Block(
                     embed_size=d_model,
                     num_heads=num_heads,
-                    relative_pe=relative_pe,
                     attn_dropout=attn_dropout,
                     intermidiate_size=intermidiate_size,
                     ff_dropout=ff_dropout,
                     norm=norm,
+                    relative_pe=relative_pe,
+                    relative_pe_kwargs=relative_pe_kwargs,
                 )
                 for _ in range(num_layers)
             ]

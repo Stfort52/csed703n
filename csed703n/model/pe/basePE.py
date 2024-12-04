@@ -12,6 +12,8 @@ class BasePE(nn.Module, ABC):
     @abstractmethod
     def max_len(self) -> int | None: ...
 
+
+class BaseRPE(BasePE):
     @property
     @abstractmethod
     def coupled(self) -> bool: ...

@@ -1,10 +1,10 @@
 import torch
 from torch import LongTensor, Tensor
 
-from . import BasePE
+from . import BaseRPE
 
 
-class SinusoidalRPE(BasePE):
+class SinusoidalRPE(BaseRPE):
     def __init__(self, max_len, embed_size):
         super(SinusoidalRPE, self).__init__()
         self._max_len = max_len

@@ -10,11 +10,12 @@ class Block(nn.Module):
         self,
         embed_size: int,
         num_heads: int,
-        relative_pe: str | None,
         attn_dropout: float,
         intermidiate_size: int,
         ff_dropout: float,
         norm: Literal["pre", "post"],
+        relative_pe: str | None = None,
+        relative_pe_kwargs: dict = {},
     ):
         super(Block, self).__init__()
         self.embed_size = embed_size
@@ -23,7 +24,10 @@ class Block(nn.Module):
         self.intermidiate_size = intermidiate_size
         self.norm = norm
 
-        self.attn = MHA(embed_size, num_heads, attn_dropout, relative_pe)
+        self.attn = MHA(
+            embed_size, num_heads, attn_dropout, relative_pe, relative_pe_kwargs
+        )
+
         self.ln1 = nn.LayerNorm(embed_size)
         self.ff = nn.Sequential(
             nn.Linear(embed_size, intermidiate_size),

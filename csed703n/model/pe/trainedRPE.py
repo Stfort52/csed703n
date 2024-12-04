@@ -1,10 +1,10 @@
 import torch
 from torch import LongTensor, Tensor, nn
 
-from . import BasePE
+from . import BaseRPE
 
 
-class TrainedRPE(BasePE):
+class TrainedRPE(BaseRPE):
     def __init__(self, max_len, embed_size):
         super(TrainedRPE, self).__init__()
         self._max_len = max_len
