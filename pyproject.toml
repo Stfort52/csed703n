@@ -11,6 +11,7 @@ authors = [
 dependencies = [
     "torch>=2.4.0, <2.5.0",
     "datasets",
+    "transformers",
     "lightning>=2.2.3",
     "torchmetrics",
     "matplotlib",
