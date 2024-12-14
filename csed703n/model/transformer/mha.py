@@ -1,5 +1,5 @@
 import einops
-from torch import Tensor, nn
+from torch import LongTensor, Tensor, nn
 
 from ..pe import BaseRPE
 from ..utils import pe_from_name
@@ -39,7 +39,7 @@ class MHA(nn.Module):
 
         self.scale = embed_size**-0.5
 
-    def forward(self, x: Tensor, mask: Tensor | None = None) -> Tensor:
+    def forward(self, x: Tensor, mask: LongTensor | None = None) -> Tensor:
         Q = einops.rearrange(self.W_q(x), "b n (h d) -> b h n d", h=self.num_heads)
         K = einops.rearrange(self.W_k(x), "b n (h d) -> b h n d", h=self.num_heads)
         V = einops.rearrange(self.W_v(x), "b n (h d) -> b h n d", h=self.num_heads)
@@ -52,8 +52,10 @@ class MHA(nn.Module):
             else:
                 A += P
 
+        # mask: [b j] -> [b 1 1 j]
         if mask is not None:
-            A = A.masked_fill(mask == 0, float("-inf"))
+            attention_mask = mask[:, None, None, :]
+            A = A.masked_fill(attention_mask == 0, float("-inf"))
 
         S = self.dropout(A.softmax(dim=-1))
 
