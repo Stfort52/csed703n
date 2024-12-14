@@ -45,10 +45,25 @@ class BertPretraining(nn.Module):
         self.lm = LanguageModeling(d_model, n_vocab)
         self.lm.tie_weights(self.embedder.embed)
 
-    def forward(self, x: LongTensor) -> Tensor:
+    def reset_weights(self, initializer_range: float = 0.02):
+        for module in self.modules():
+            match module:
+                case nn.Linear():
+                    module.weight.data.normal_(mean=0.0, std=initializer_range)
+                    if module.bias is not None:
+                        module.bias.data.zero_()
+                case nn.Embedding():
+                    module.weight.data.normal_(mean=0.0, std=initializer_range)
+                case nn.LayerNorm():
+                    module.weight.data.fill_(1.0)
+                    module.bias.data.zero_()
+                case _:
+                    print("Don't know how to reset weights for", module)
+
+    def forward(self, x: LongTensor, mask: LongTensor | None = None) -> Tensor:
         if self.pe is not None:
             x = self.embedder(x) + self.pe(x)
         else:
             x = self.embedder(x)
-        x = self.encoder(x)
+        x = self.encoder(x, mask)
         return self.lm(x)
