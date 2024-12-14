@@ -1,6 +1,6 @@
 from typing import Literal
 
-from torch import Tensor, nn
+from torch import LongTensor, Tensor, nn
 
 from . import Block
 
@@ -26,21 +26,22 @@ class Encoder(nn.Module):
         self.attn_dropout = attn_dropout
         self.ff_dropout = ff_dropout
 
-        self.layers = nn.Sequential(
-            *[
-                Block(
-                    embed_size=d_model,
-                    num_heads=num_heads,
-                    attn_dropout=attn_dropout,
-                    intermidiate_size=intermidiate_size,
-                    ff_dropout=ff_dropout,
-                    norm=norm,
-                    relative_pe=relative_pe,
-                    relative_pe_kwargs=relative_pe_kwargs,
-                )
-                for _ in range(num_layers)
-            ]
+        self.layers = nn.ModuleList(
+            Block(
+                embed_size=d_model,
+                num_heads=num_heads,
+                attn_dropout=attn_dropout,
+                intermidiate_size=intermidiate_size,
+                ff_dropout=ff_dropout,
+                norm=norm,
+                relative_pe=relative_pe,
+                relative_pe_kwargs=relative_pe_kwargs,
+            )
+            for _ in range(num_layers)
         )
 
-    def forward(self, x: Tensor) -> Tensor:
-        return self.layers(x)
+    def forward(self, x: Tensor, mask: LongTensor | None = None) -> Tensor:
+        for layer in self.layers:
+            x = layer(x, mask)
+
+        return x

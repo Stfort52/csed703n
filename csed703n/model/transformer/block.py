@@ -1,6 +1,6 @@
 from typing import Literal
 
-from torch import Tensor, nn
+from torch import LongTensor, Tensor, nn
 
 from . import MHA
 
@@ -16,6 +16,7 @@ class Block(nn.Module):
         norm: Literal["pre", "post"],
         relative_pe: str | None = None,
         relative_pe_kwargs: dict = {},
+        ln_eps: float = 1e-12,
     ):
         super(Block, self).__init__()
         self.embed_size = embed_size
@@ -28,21 +29,21 @@ class Block(nn.Module):
             embed_size, num_heads, attn_dropout, relative_pe, relative_pe_kwargs
         )
 
-        self.ln1 = nn.LayerNorm(embed_size)
+        self.ln1 = nn.LayerNorm(embed_size, ln_eps)
         self.ff = nn.Sequential(
             nn.Linear(embed_size, intermidiate_size),
             nn.GELU(),
             nn.Dropout(ff_dropout),
             nn.Linear(intermidiate_size, embed_size),
         )
-        self.ln2 = nn.LayerNorm(embed_size)
+        self.ln2 = nn.LayerNorm(embed_size, ln_eps)
 
-    def forward(self, x: Tensor) -> Tensor:
+    def forward(self, x: Tensor, mask: LongTensor | None = None) -> Tensor:
         if self.norm == "pre":
-            x = x + self.attn(self.ln1(x))
+            x = x + self.attn(self.ln1(x), mask)
             x = x + self.ff(self.ln2(x))
         elif self.norm == "post":
-            x = self.ln1(x + self.attn(x))
+            x = self.ln1(x + self.attn(x, mask))
             x = self.ln2(x + self.ff(x))
         else:
             raise ValueError(":(")
