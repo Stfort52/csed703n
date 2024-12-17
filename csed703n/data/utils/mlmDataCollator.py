@@ -3,7 +3,7 @@ from typing import Literal, cast
 import torch
 from torch import LongTensor
 
-from csed703n.data.utils.cell import Cell
+from . import Cell
 
 
 class MlmDataCollator:
