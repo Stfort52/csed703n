@@ -20,7 +20,8 @@ dependencies = [
     "jupyter",
     "einops",
     "tensorboardX",
-    "torch-tb-profiler"
+    "torch-tb-profiler",
+    "scikit-learn"
 ]
 
 [project.optional-dependencies]
