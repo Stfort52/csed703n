@@ -1,3 +1,3 @@
-from .genecorpus import GenecorpusDataModule as GenecorpusDataModule
+from .pretraining import GenecorpusDataModule as GenecorpusDataModule
 
 __all__ = ["GenecorpusDataModule"]
