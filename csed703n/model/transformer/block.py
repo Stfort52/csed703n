@@ -2,6 +2,7 @@ from typing import Literal
 
 from torch import LongTensor, Tensor, nn
 
+from ..utils import activation_from_name
 from . import MHA
 
 
@@ -28,14 +29,20 @@ class Block(nn.Module):
         self.act_fn = activation_from_name(act_fn)
 
         self.attn = MHA(
-            embed_size, num_heads, attn_dropout, relative_pe, relative_pe_kwargs
+            embed_size,
+            num_heads,
+            attn_dropout,
+            ff_dropout,
+            relative_pe,
+            relative_pe_kwargs,
         )
-
         self.ln1 = nn.LayerNorm(embed_size, ln_eps)
+
         self.ff = nn.Sequential(
             nn.Linear(embed_size, intermidiate_size),
             self.act_fn(),
             nn.Linear(intermidiate_size, embed_size),
+            nn.Dropout(ff_dropout),
         )
         self.ln2 = nn.LayerNorm(embed_size, ln_eps)
 

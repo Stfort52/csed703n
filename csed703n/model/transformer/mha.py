@@ -10,7 +10,8 @@ class MHA(nn.Module):
         self,
         embed_size: int,
         num_heads: int,
-        dropout: float = 0.0,
+        attn_dropout: float = 0.0,
+        output_dropout: float = 0.0,
         relative_pe: str | None = None,
         relative_pe_kwargs: dict = {},
     ):
@@ -26,7 +27,8 @@ class MHA(nn.Module):
         self.W_v = nn.Linear(embed_size, embed_size)
         self.W_o = nn.Linear(embed_size, embed_size)
 
-        self.dropout = nn.Dropout(dropout)
+        self.attn_dropout = nn.Dropout(attn_dropout)
+        self.output_dropout = nn.Dropout(output_dropout)
 
         if relative_pe is not None:
             relative_pe_kwargs.setdefault("embed_size", embed_size)
@@ -37,7 +39,7 @@ class MHA(nn.Module):
         else:
             self.relative_pe = None
 
-        self.scale = embed_size**-0.5
+        self.scale = self.head_dim**-0.5
 
     def forward(self, x: Tensor, mask: LongTensor | None = None) -> Tensor:
         Q = einops.rearrange(self.W_q(x), "b n (h d) -> b h n d", h=self.num_heads)
@@ -57,8 +59,10 @@ class MHA(nn.Module):
             attention_mask = mask[:, None, None, :]
             A = A.masked_fill(attention_mask == 0, float("-inf"))
 
-        S = self.dropout(A.softmax(dim=-1))
+        S = self.attn_dropout(A.softmax(dim=-1))
 
-        O = einops.einsum(S, V, "b h i j, b h j d -> b h i d")
+        C = einops.einsum(S, V, "b h i j, b h j d -> b h i d")
 
-        return self.W_o(einops.rearrange(O, "b h n d -> b n (h d)"))
+        O = self.W_o(einops.rearrange(C, "b h n d -> b n (h d)"))
+
+        return self.output_dropout(O)
