@@ -118,12 +118,18 @@ class NerDataModule(L.LightningDataModule):
         self.train_dataset = self.train_dataset.map(
             self._add_labels,
             num_proc=self.num_workers,
-            fn_kwargs={"label_map": self.token_dict, "ignore_index": self.ignore_index},
+            fn_kwargs={
+                "label_map": self.entity_labels,
+                "ignore_index": self.ignore_index,
+            },
         )
         self.test_dataset = self.test_dataset.map(
             self._add_labels,
             num_proc=self.num_workers,
-            fn_kwargs={"label_map": self.token_dict, "ignore_index": self.ignore_index},
+            fn_kwargs={
+                "label_map": self.entity_labels,
+                "ignore_index": self.ignore_index,
+            },
         )
 
         # set the format
@@ -166,9 +172,8 @@ class NerDataModule(L.LightningDataModule):
     def _add_labels(
         examples: dict[str, Any], label_map: dict[str, int], ignore_index: int
     ) -> dict[str, Any]:
-        assert "gene_labels" in examples
         examples["gene_labels"] = [
-            int(label_map.get(label, ignore_index)) for label in examples["gene_labels"]
+            int(label_map.get(label, ignore_index)) for label in examples["input_ids"]
         ]
         return examples
 
