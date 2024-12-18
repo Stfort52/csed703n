@@ -13,10 +13,10 @@ class GenecorpusDataModule(L.LightningDataModule):
         self,
         dataset_dir: str | Path,
         token_dict: dict[str, int],
-        ignore_index: int | None = None,
-        batch_size=32,
+        ignore_index: int = -100,
+        batch_size: int = 32,
         shuffle: int | bool = 42,
-        num_workers=4,
+        num_workers: int = 16,
     ):
         super().__init__()
         self.dataset_dir = Path(dataset_dir)

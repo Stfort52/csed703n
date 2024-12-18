@@ -11,17 +11,16 @@ class NerDataCollator:
         self,
         token_dict: dict[str, int],
         pad_token_or_index: str | int,
-        ignore_index: int | None = None,
+        ignore_index: int = -100,
         max_length: int | Literal["longest"] = 2_048,
     ):
         self.max_length = max_length
+        self.ignore_index = ignore_index
 
         if isinstance(pad_token_or_index, str):
             self.pad_index = token_dict[pad_token_or_index]
         else:
             self.pad_index = pad_token_or_index
-
-        self.ignore_index = ignore_index or -100
 
     def __call__(self, batch: list[Cell]) -> tuple[LongTensor, LongTensor, LongTensor]:
         input_ids = [example["input_ids"] for example in batch]

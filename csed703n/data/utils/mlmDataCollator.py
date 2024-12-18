@@ -13,13 +13,14 @@ class MlmDataCollator:
         pad_token_or_index: str | int,
         mask_token_or_index: str | int,
         mask_prob: float = 0.15,
-        ignore_index: int | None = None,
+        ignore_index: int = -100,
         max_length: int | Literal["longest"] = 2_048,
     ):
         self.token_dict = token_dict
         self.max_length = max_length
         self.vocab_size = len(token_dict)
         self.mask_prob = mask_prob
+        self.ignore_index = ignore_index
 
         if isinstance(pad_token_or_index, str):
             self.pad_index = token_dict[pad_token_or_index]
@@ -31,7 +32,6 @@ class MlmDataCollator:
         else:
             self.mask_index = mask_token_or_index
 
-        self.ignore_index = ignore_index or -100
         self.word_pool = torch.tensor(
             list(set(token_dict.values()) - {self.pad_index, self.mask_index}),
             dtype=torch.long,

@@ -4,7 +4,6 @@ from typing import Any, cast
 import datasets
 import lightning as L
 import pandas as pd
-from lightning.pytorch.utilities.types import EVAL_DATALOADERS
 from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader
 
@@ -20,11 +19,11 @@ class NerDataModule(L.LightningDataModule):
         train_cell_count_or_ratio: int | float = 10_000,
         test_cell_count_or_ratio: int | float = 2_000,
         test_gene_ratio: float = 0.2,
-        ignore_index: int | None = None,
-        batch_size=32,
+        ignore_index: int = -100,
+        batch_size: int = 32,
         dataset_shuffle: int | bool = 42,
         label_shuffle: int | bool = 42,
-        num_workers=4,
+        num_workers: int = 16,
     ):
         super().__init__()
         self.dataset_dir = Path(dataset_dir)
