@@ -1,3 +1,4 @@
+import os
 import pickle
 import random
 from pathlib import Path
@@ -18,6 +19,8 @@ if __name__ == "__main__":
     np.random.seed(42)
     random.seed(42)
     torch.set_float32_matmul_precision("high")
+
+    WORLD_SIZE = int(os.getenv("WORLD_SIZE", 1))
 
     dataset_dir = Path("~/tools/GeneCorpus/genecorpus_1M_2048.dataset").expanduser()
 
@@ -49,7 +52,11 @@ if __name__ == "__main__":
     tb_logger = TensorBoardLogger("checkpoints", version=csv_logger.version)
 
     trainer = L.Trainer(
-        logger=[csv_logger, tb_logger], callbacks=[checkpoint_callback], max_epochs=1
+        logger=[csv_logger, tb_logger],
+        callbacks=[checkpoint_callback],
+        max_epochs=1,
+        strategy="ddp" if WORLD_SIZE > 1 else "auto",
+        num_nodes=WORLD_SIZE,
     )
 
     trainer.fit(model, data)
