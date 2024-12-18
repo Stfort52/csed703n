@@ -1,13 +1,18 @@
 from torch import Tensor, nn
-from torch.functional import F
+
+from ..utils import activation_from_name
 
 
 class LanguageModeling(nn.Module):
-    def __init__(self, d_model: int, n_vocab: int, ln_eps: float = 1e-12):
+    def __init__(
+        self, d_model: int, n_vocab: int, ln_eps: float = 1e-12, act_fn: str = "relu"
+    ):
         super(LanguageModeling, self).__init__()
 
         self.dense = nn.Sequential(
-            nn.Linear(d_model, d_model), nn.GELU(), nn.LayerNorm(d_model, ln_eps)
+            nn.Linear(d_model, d_model),
+            activation_from_name(act_fn)(),
+            nn.LayerNorm(d_model, ln_eps),
         )
         self.unembedding = nn.Linear(d_model, n_vocab, bias=True)
 
