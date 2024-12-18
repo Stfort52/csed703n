@@ -14,7 +14,7 @@ class TupeBase(BertBase):
 
     def __init__(self, *args, **kwargs):
         super(TupeBase, self).__init__(*args, **kwargs)
-        self.tupe = TUPE(kwargs["d_model"], kwargs["num_heads"])
+        self.tupe = TUPE(self.encoder.d_model, self.encoder.num_heads)
         self.absolute_pe: BasePE
 
     def _check_args(self) -> None:
