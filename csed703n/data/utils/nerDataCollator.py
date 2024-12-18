@@ -49,3 +49,11 @@ class NerDataCollator:
             padding_mask[i, :length] = 1
 
         return inputs, labels, padding_mask  # pyright: ignore[reportReturnType]
+
+    def __repr__(self) -> str:
+        return (
+            f"{self.__class__.__name__}("
+            f"max_length={self.max_length}, "
+            f"pad_index={self.pad_index}, "
+            f"ignore_index={self.ignore_index})"
+        )

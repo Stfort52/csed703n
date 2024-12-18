@@ -72,3 +72,13 @@ class MlmDataCollator:
         labels[~should_mask] = self.ignore_index
 
         return inputs, labels, padding_mask  # pyright: ignore[reportReturnType]
+
+    def __repr__(self) -> str:
+        return (
+            f"{self.__class__.__name__}("
+            f"max_length={self.max_length}, "
+            f"pad_index={self.pad_index}, "
+            f"mask_index={self.mask_index}, "
+            f"mask_prob={self.mask_prob}, "
+            f"ignore_index={self.ignore_index})"
+        )
