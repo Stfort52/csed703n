@@ -24,7 +24,7 @@ class BertPretraining(nn.Module):
         pe_kwargs: dict,
     ):
         super(BertPretraining, self).__init__()
-        self.embedder = WordEmbedding(n_vocab, d_model)
+        self.embedder = WordEmbedding(n_vocab, d_model, dropout_p=ff_dropout)
 
         pe = pe_from_name(pe_strategy)
         pe_kwargs.setdefault("embed_size", d_model)
@@ -58,7 +58,7 @@ class BertPretraining(nn.Module):
                     module.weight.data.fill_(1.0)
                     module.bias.data.zero_()
                 case _:
-                    print("Don't know how to reset weights for", module)
+                    pass
 
     def forward(self, x: LongTensor, mask: LongTensor | None = None) -> Tensor:
         if self.pe is not None:
