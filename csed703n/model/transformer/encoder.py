@@ -15,9 +15,9 @@ class Encoder(nn.Module):
         attn_dropout: float,
         ff_dropout: float,
         norm: Literal["pre", "post"],
-        relative_pe: str | None = None,
-        relative_pe_kwargs: dict = {},
-        act_fn: str = "relu",
+        relative_pe: str | None,
+        relative_pe_kwargs: dict,
+        act_fn: str,
     ):
         super(Encoder, self).__init__()
         self.d_model = d_model
