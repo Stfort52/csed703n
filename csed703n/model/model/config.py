@@ -10,6 +10,7 @@ class BertConfig(TypedDict):
     attn_dropout: float
     ff_dropout: float
     norm: Literal["pre", "post"]
+    tupe: bool
     absolute_pe_strategy: str | None
     absolute_pe_kwargs: dict[str, Any]
     relative_pe_strategy: str | None

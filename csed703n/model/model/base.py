@@ -20,10 +20,10 @@ class BertBase(nn.Module):
         ff_dropout: float,
         norm: Literal["pre", "post"],
         absolute_pe_strategy: str | None = None,
-        absolute_pe_kwargs: dict["str", Any] = {},
+        absolute_pe_kwargs: dict[str, Any] = {},
         relative_pe_strategy: str | None = None,
-        relative_pe_kwargs: dict["str", Any] = {},
-        act_fn: str = "gelu",
+        relative_pe_kwargs: dict[str, Any] = {},
+        act_fn: str = "relu",
     ):
         super(BertBase, self).__init__()
         self.absolute_pe_strategy = absolute_pe_strategy
