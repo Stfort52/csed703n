@@ -119,7 +119,7 @@ class NerDataModule(L.LightningDataModule):
             self._add_labels,
             num_proc=self.num_workers,
             fn_kwargs={
-                "label_map": self.entity_labels,
+                "label_map": self.train_labels,
                 "ignore_index": self.ignore_index,
             },
         )
@@ -127,7 +127,7 @@ class NerDataModule(L.LightningDataModule):
             self._add_labels,
             num_proc=self.num_workers,
             fn_kwargs={
-                "label_map": self.entity_labels,
+                "label_map": self.test_labels,
                 "ignore_index": self.ignore_index,
             },
         )
