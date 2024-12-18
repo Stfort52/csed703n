@@ -1,7 +1,7 @@
 import einops
 import lightning as L
 from torch import LongTensor, nn, optim
-from transformers import get_cosine_schedule_with_warmup
+from transformers import get_scheduler
 
 from ..model import BertConfig, BertPretraining
 
@@ -14,6 +14,8 @@ class LightningPretraining(L.LightningModule):
         lr: float = 5e-5,
         weight_decay: float = 0.01,
         initialization_range: float = 0.02,
+        lr_scheduler: str = "cosine",
+        warmup_steps_or_ratio: int | float = 0.1,
     ):
         super(LightningPretraining, self).__init__()
         self.model = BertPretraining(**config)
@@ -22,6 +24,8 @@ class LightningPretraining(L.LightningModule):
         self.lr = lr
         self.weight_decay = weight_decay
         self.ignore_index = ignore_index
+        self.lr_scheduler = lr_scheduler
+        self.warmup_steps_or_ratio = warmup_steps_or_ratio
 
         self.save_hyperparameters()
 
@@ -40,13 +44,25 @@ class LightningPretraining(L.LightningModule):
         return loss
 
     def configure_optimizers(self):  # pyright: ignore[reportIncompatibleMethodOverride]
+        if isinstance(self.warmup_steps_or_ratio, float):
+            assert (
+                0.0 < self.warmup_steps_or_ratio < 1.0
+            ), "Warmup ratio should be in (0, 1)"
+            warmup_steps = int(self.total_steps * self.warmup_steps_or_ratio)
+        else:
+            assert (
+                0 < self.warmup_steps_or_ratio < self.total_steps
+            ), "Warmup steps should be in (0, total_steps)"
+            warmup_steps = self.warmup_steps_or_ratio
+
         optimizer = optim.AdamW(
             self.model.parameters(), lr=self.lr, weight_decay=self.weight_decay
         )
 
-        scheduler = get_cosine_schedule_with_warmup(
-            optimizer,
-            num_warmup_steps=self.total_steps // 10,
+        scheduler = get_scheduler(
+            self.lr_scheduler,
+            optimizer=optimizer,
+            num_warmup_steps=warmup_steps,
             num_training_steps=self.total_steps,
         )
 
