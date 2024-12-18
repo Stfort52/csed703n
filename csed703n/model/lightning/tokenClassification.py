@@ -1,16 +1,20 @@
+from pathlib import Path
+from typing import cast
+
 import einops
 import lightning as L
 from torch import LongTensor, nn, optim
 from transformers import get_scheduler
 
-from ..model import BertConfig, BertTokenClassification
+from ..model import BertBase, BertConfig, BertTokenClassification
 from ..utils import create_metrics
+from . import LightningPretraining
 
 
 class LightningTokenClassification(L.LightningModule):
     def __init__(
         self,
-        config: BertConfig,
+        model_path_or_config: str | Path | BertConfig,
         n_classes: int,
         cls_dropout: float = 0.0,
         ignore_index: int = -100,
@@ -22,9 +26,21 @@ class LightningTokenClassification(L.LightningModule):
         freeze_first_n_layers: int = 0,
     ):
         super(LightningTokenClassification, self).__init__()
-        self.model = BertTokenClassification(
-            **config, n_classes=n_classes, cls_dropout=cls_dropout
-        )
+
+        if isinstance(model_path_or_config, (str, Path)):
+            pretrained = LightningPretraining.load_from_checkpoint(model_path_or_config)
+            base_model = pretrained.model.bert
+            config = cast(BertConfig, pretrained.hparams["config"])
+            self.model = BertTokenClassification(
+                **config, n_classes=n_classes, cls_dropout=cls_dropout
+            )
+            self.model.bert = base_model
+        else:
+            config = model_path_or_config
+            self.model = BertTokenClassification(
+                **config, n_classes=n_classes, cls_dropout=cls_dropout
+            )
+
         self.model.reset_weights(initialization_range)
 
         if freeze_first_n_layers > 0:
