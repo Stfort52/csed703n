@@ -41,11 +41,17 @@ class MHA(nn.Module):
 
         self.scale = self.head_dim**-0.5
 
-    def forward(self, x: Tensor, mask: LongTensor | None = None) -> Tensor:
+    def forward(
+        self, x: Tensor, mask: LongTensor | None = None, tupe_mtx: Tensor | None = None
+    ) -> Tensor:
         Q = einops.rearrange(self.W_q(x), "b n (h d) -> b h n d", h=self.num_heads)
         K = einops.rearrange(self.W_k(x), "b n (h d) -> b h n d", h=self.num_heads)
         V = einops.rearrange(self.W_v(x), "b n (h d) -> b h n d", h=self.num_heads)
         A = einops.einsum(Q, K, "b h i d, b h j d -> b h i j") * self.scale
+
+        if tupe_mtx is not None:
+            A *= 2**-0.5
+            A += tupe_mtx.unsqueeze(0)  # [h i j]
 
         if self.relative_pe is not None:
             P = self.relative_pe(x)  # [i j d]

@@ -42,8 +42,10 @@ class Encoder(nn.Module):
             for _ in range(num_layers)
         )
 
-    def forward(self, x: Tensor, mask: LongTensor | None = None) -> Tensor:
+    def forward(
+        self, x: Tensor, mask: LongTensor | None = None, tupe_mtx: Tensor | None = None
+    ) -> Tensor:
         for layer in self.layers:
-            x = layer(x, mask)
+            x = layer(x, mask, tupe_mtx)
 
         return x

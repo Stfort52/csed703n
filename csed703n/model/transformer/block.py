@@ -46,12 +46,14 @@ class Block(nn.Module):
         )
         self.ln2 = nn.LayerNorm(embed_size, ln_eps)
 
-    def forward(self, x: Tensor, mask: LongTensor | None = None) -> Tensor:
+    def forward(
+        self, x: Tensor, mask: LongTensor | None = None, tupe_mtx: Tensor | None = None
+    ) -> Tensor:
         if self.norm == "pre":
-            x = x + self.attn(self.ln1(x), mask)
+            x = x + self.attn(self.ln1(x), mask, tupe_mtx)
             x = x + self.ff(self.ln2(x))
         elif self.norm == "post":
-            x = self.ln1(x + self.attn(x, mask))
+            x = self.ln1(x + self.attn(x, mask, tupe_mtx))
             x = self.ln2(x + self.ff(x))
         else:
             raise ValueError(":(")
