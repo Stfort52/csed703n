@@ -19,7 +19,7 @@ export WORLD_SIZE=$WORLD_SIZE
 for node in $(echo $NODES | sed "s/,/ /g"); do
     if [ $node == $(hostname) ]; then
         echo "Starting master on $MASTER_ADDR:$MASTER_PORT with $WORLD_SIZE nodes"
-        python3 -m blastema.train.$TO_RUN &
+        python3 -m csed703n.train.$TO_RUN &
         continue
     fi
     
@@ -29,7 +29,7 @@ for node in $(echo $NODES | sed "s/,/ /g"); do
         MASTER_ADDR=$MASTER_ADDR \
         MASTER_PORT=$MASTER_PORT \
         WORLD_SIZE=$WORLD_SIZE \
-        "$(which python3) -m blastema.train.$TO_RUN" &
+        "$(which python3) -m csed703n.train.$TO_RUN" &
     
     rank=$((rank+1))
 
