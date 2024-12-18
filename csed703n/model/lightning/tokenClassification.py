@@ -61,8 +61,12 @@ class LightningTokenClassification(L.LightningModule):
         self.save_hyperparameters()
 
         self.loss = nn.CrossEntropyLoss(ignore_index=ignore_index)
-        self.threshold_metrics = threshold_metrics(num_classes=n_classes)
-        self.continueous_metrics = continuous_metrics(num_classes=n_classes)
+        self.threshold_metrics = threshold_metrics(
+            num_classes=n_classes, ignore_index=ignore_index
+        )
+        self.continueous_metrics = continuous_metrics(
+            num_classes=n_classes, ignore_index=ignore_index
+        )
 
     def training_step(self, batch: tuple[LongTensor, LongTensor, LongTensor], _):
         inputs, labels, padding_mask = batch
@@ -83,20 +87,13 @@ class LightningTokenClassification(L.LightningModule):
         self.log("val_loss", loss, prog_bar=True)
 
         probablities = nn.functional.softmax(logits, dim=-1)
-        predictions = probablities.argmax(dim=-1)
+        if probablities.size(-1) == 2:
+            probablities = probablities[:, 1]
 
-        self.log_dict(
-            self.threshold_metrics(
-                predictions[labels != self.ignore_index],
-                labels[labels != self.ignore_index],
-            )
-        )
-        self.log_dict(
-            self.continueous_metrics(
-                probablities[labels != self.ignore_index],
-                labels[labels != self.ignore_index],
-            )
-        )
+        predictions = logits.argmax(dim=-1)
+
+        self.log_dict(self.threshold_metrics(predictions, labels))
+        self.log_dict(self.continueous_metrics(probablities, labels))
 
         return loss
 
