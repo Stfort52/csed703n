@@ -24,11 +24,10 @@ if __name__ == "__main__":
     BATCH_SIZE = 16
     BATCH_PER_GPU = BATCH_SIZE // WORLD_SIZE
 
-    dataset_dir = Path("~/tools/GeneCorpus/genecorpus_1M_2048.dataset").expanduser()
+    DATA_DIR = Path(__file__).parent.parent / "data"
 
-    token_dict = pickle.load(
-        Path("~/tools/GeneCorpus/token_dictionary.pkl").expanduser().open("rb")
-    )
+    dataset_dir = DATA_DIR / "datasets/genecorpus_1M_2048.dataset"
+    token_dict = pickle.load((DATA_DIR / "token_dictionary.pkl").open("rb"))
 
     data = GenecorpusDataModule(
         dataset_dir, token_dict=token_dict, batch_size=BATCH_PER_GPU
