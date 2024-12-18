@@ -6,8 +6,8 @@ import lightning as L
 from torch import LongTensor, nn, optim
 from transformers import get_scheduler
 
-from ..model import BertBase, BertConfig, BertTokenClassification
-from ..utils import create_metrics
+from ..model import BertConfig, BertTokenClassification
+from ..utils import continuous_metrics, threshold_metrics
 from . import LightningPretraining
 
 
@@ -61,7 +61,8 @@ class LightningTokenClassification(L.LightningModule):
         self.save_hyperparameters()
 
         self.loss = nn.CrossEntropyLoss(ignore_index=ignore_index)
-        self.metrics = create_metrics(num_classes=n_classes)
+        self.threshold_metrics = threshold_metrics(num_classes=n_classes)
+        self.continueous_metrics = continuous_metrics(num_classes=n_classes)
 
     def training_step(self, batch: tuple[LongTensor, LongTensor, LongTensor], _):
         inputs, labels, padding_mask = batch
@@ -79,9 +80,24 @@ class LightningTokenClassification(L.LightningModule):
         logits = einops.rearrange(logits, "b n v -> (b n) v")
         labels = labels.flatten()
         loss = self.loss(logits, labels)
-
         self.log("val_loss", loss, prog_bar=True)
-        self.log_dict(self.metrics(logits, labels))
+
+        probablities = nn.functional.softmax(logits, dim=-1)
+        predictions = probablities.argmax(dim=-1)
+
+        self.log_dict(
+            self.threshold_metrics(
+                predictions[labels != self.ignore_index],
+                labels[labels != self.ignore_index],
+            )
+        )
+        self.log_dict(
+            self.continueous_metrics(
+                probablities[labels != self.ignore_index],
+                labels[labels != self.ignore_index],
+            )
+        )
+
         return loss
 
     def configure_optimizers(self):  # pyright: ignore[reportIncompatibleMethodOverride]
