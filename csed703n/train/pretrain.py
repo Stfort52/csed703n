@@ -21,6 +21,8 @@ if __name__ == "__main__":
     torch.set_float32_matmul_precision("high")
 
     WORLD_SIZE = int(os.getenv("WORLD_SIZE", 1))
+    BATCH_SIZE = 16
+    BATCH_PER_GPU = BATCH_SIZE // WORLD_SIZE
 
     dataset_dir = Path("~/tools/GeneCorpus/genecorpus_1M_2048.dataset").expanduser()
 
@@ -28,7 +30,9 @@ if __name__ == "__main__":
         Path("~/tools/GeneCorpus/token_dictionary.pkl").expanduser().open("rb")
     )
 
-    data = GenecorpusDataModule(dataset_dir, token_dict=token_dict, batch_size=16)
+    data = GenecorpusDataModule(
+        dataset_dir, token_dict=token_dict, batch_size=BATCH_PER_GPU
+    )
 
     config = BertConfig(
         n_vocab=len(token_dict),
