@@ -2,12 +2,11 @@ from typing import Literal
 
 from torch import LongTensor, Tensor, nn
 
-from ..unembedder import LanguageModeling
 from ..utils import reset_weights
 from . import BertBase
 
 
-class BertPretraining(nn.Module):
+class BertNER(nn.Module):
     def __init__(
         self,
         n_vocab: int,
@@ -22,7 +21,7 @@ class BertPretraining(nn.Module):
         pe_kwargs: dict,
         act_fn: str,
     ):
-        super(BertPretraining, self).__init__()
+        super(BertNER, self).__init__()
 
         self.bert = BertBase(
             n_vocab,
@@ -38,15 +37,15 @@ class BertPretraining(nn.Module):
             act_fn,
         )
 
-        self.lm = LanguageModeling(d_model, n_vocab)
-        self.lm.tie_weights(self.bert.embedder.embed)
+        # TODO: Implement NER head
+        self.ner = nn.Identity()
 
     def reset_weights(
-        self, initialization_range: float = 0.02, reset_all: bool = True
+        self, initialization_range: float = 0.02, reset_all: bool = False
     ) -> None:
-        reset_weights(self.lm, initialization_range)
         if reset_all:
             reset_weights(self.bert, initialization_range)
+        reset_weights(self.ner, initialization_range)
 
     def forward(self, x: LongTensor, mask: LongTensor | None = None) -> Tensor:
-        return self.lm(self.bert(x, mask))
+        return self.ner(self.bert(x, mask))

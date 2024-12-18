@@ -2,12 +2,13 @@ from typing import Literal
 
 from torch import LongTensor, Tensor, nn
 
-from ..unembedder import LanguageModeling
-from ..utils import reset_weights
-from . import BertBase
+from ..embedder import WordEmbedding
+from ..pe import BaseRPE
+from ..transformer import Encoder
+from ..utils import pe_from_name
 
 
-class BertPretraining(nn.Module):
+class BertBase(nn.Module):
     def __init__(
         self,
         n_vocab: int,
@@ -22,10 +23,14 @@ class BertPretraining(nn.Module):
         pe_kwargs: dict,
         act_fn: str,
     ):
-        super(BertPretraining, self).__init__()
+        super(BertBase, self).__init__()
+        self.embedder = WordEmbedding(n_vocab, d_model, dropout_p=ff_dropout)
 
-        self.bert = BertBase(
-            n_vocab,
+        pe = pe_from_name(pe_strategy)
+        pe_kwargs.setdefault("embed_size", d_model)
+        self.pe = pe(**pe_kwargs) if not issubclass(pe, BaseRPE) else None
+
+        self.encoder = Encoder(
             d_model,
             num_heads,
             num_layers,
@@ -38,15 +43,9 @@ class BertPretraining(nn.Module):
             act_fn,
         )
 
-        self.lm = LanguageModeling(d_model, n_vocab)
-        self.lm.tie_weights(self.bert.embedder.embed)
-
-    def reset_weights(
-        self, initialization_range: float = 0.02, reset_all: bool = True
-    ) -> None:
-        reset_weights(self.lm, initialization_range)
-        if reset_all:
-            reset_weights(self.bert, initialization_range)
-
     def forward(self, x: LongTensor, mask: LongTensor | None = None) -> Tensor:
-        return self.lm(self.bert(x, mask))
+        if self.pe is not None:
+            x = self.embedder(x) + self.pe(x)
+        else:
+            x = self.embedder(x)
+        return self.encoder(x, mask)
