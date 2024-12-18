@@ -32,9 +32,8 @@ class MHA(nn.Module):
 
         if relative_pe is not None:
             relative_pe_kwargs.setdefault("embed_size", embed_size)
-            pe_type = pe_from_name(relative_pe)
-            self.relative_pe = (
-                pe_type(**relative_pe_kwargs) if issubclass(pe_type, BaseRPE) else None
+            self.relative_pe = pe_from_name("relative", relative_pe)(
+                **relative_pe_kwargs
             )
         else:
             self.relative_pe = None

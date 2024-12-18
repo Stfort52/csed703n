@@ -1,4 +1,4 @@
-from typing import Type
+from typing import Literal, Type
 
 from ..pe import *
 
@@ -14,9 +14,5 @@ MODEL_MAP = {
 }
 
 
-def pe_from_name(name: str) -> Type[BasePE]:
-    match name.lower().split("-"):
-        case pe_type, pe_kind:
-            return MODEL_MAP[pe_type][pe_kind]
-        case _:
-            raise ValueError(f"Unknown PE type: {name}")
+def pe_from_name(category: Literal["absolute", "relative"], name: str) -> Type[BasePE]:
+    return MODEL_MAP[category][name]
