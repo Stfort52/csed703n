@@ -73,12 +73,12 @@ class NerDataModule(L.LightningDataModule):
                 )
 
         # pick cells with at least one gene label
-        train_label_list = self.train_labels.to_list()
+        train_label_list = self.train_labels.index.to_list()
         self.train_dataset = self.dataset.filter(
             lambda cell: not set(cell["input_ids"]).isdisjoint(train_label_list),
             num_proc=self.num_workers,
         )
-        test_label_list = self.test_labels.to_list()
+        test_label_list = self.test_labels.index.to_list()
         self.test_dataset = self.dataset.filter(
             lambda cell: not set(cell["input_ids"]).isdisjoint(test_label_list),
             num_proc=self.num_workers,
@@ -90,7 +90,7 @@ class NerDataModule(L.LightningDataModule):
             if n_train_cells > len(self.train_dataset):
                 self.print(
                     f"Requested {n_train_cells} train cells, "
-                    "but only {len(self.train_dataset)} are available."
+                    f"but only {len(self.train_dataset)} are available. "
                     "Using all available cells."
                 )
                 n_train_cells = len(self.train_dataset)
@@ -104,7 +104,7 @@ class NerDataModule(L.LightningDataModule):
             if n_test_cells > len(self.test_dataset):
                 self.print(
                     f"Requested {n_test_cells} test cells, "
-                    "but only {len(self.test_dataset)} are available."
+                    f"but only {len(self.test_dataset)} are available. "
                     "Using all available cells."
                 )
                 n_test_cells = len(self.test_dataset)
@@ -134,6 +134,9 @@ class NerDataModule(L.LightningDataModule):
 
         # set the format
         self.train_dataset.set_format(
+            type="torch", columns=["input_ids", "gene_labels"], output_all_columns=True
+        )
+        self.test_dataset.set_format(
             type="torch", columns=["input_ids", "gene_labels"], output_all_columns=True
         )
 
