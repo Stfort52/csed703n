@@ -5,11 +5,15 @@ from ..pe import *
 MODEL_MAP = {
     "absolute": {
         "trained": TrainedPE,
+        "learned": TrainedPE,  # alias
         "sinusoidal": SinusoidalPE,
+        "trigonometric": SinusoidalPE,  # alias
     },
     "relative": {
         "trained": TrainedRPE,
+        "learned": TrainedRPE,  # alias
         "sinusoidal": SinusoidalRPE,
+        "trigonometric": SinusoidalRPE,  # alias
     },
 }
 
