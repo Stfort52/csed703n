@@ -1,14 +1,17 @@
+import einops
 import lightning as L
 from torch import LongTensor, nn, optim
 from transformers import get_scheduler
 
 from ..model import BertConfig, BertTokenClassification
+from ..utils import create_metrics
 
 
 class LightningTokenClassification(L.LightningModule):
     def __init__(
         self,
         config: BertConfig,
+        n_classes: int,
         cls_dropout: float = 0.0,
         ignore_index: int = -100,
         lr: float = 5e-5,
@@ -16,10 +19,22 @@ class LightningTokenClassification(L.LightningModule):
         initialization_range: float = 0.02,
         lr_scheduler: str = "cosine",
         warmup_steps_or_ratio: int | float = 0.1,
+        freeze_first_n_layers: int = 0,
     ):
         super(LightningTokenClassification, self).__init__()
-        self.model = BertTokenClassification(**config, cls_dropout=cls_dropout)
+        self.model = BertTokenClassification(
+            **config, n_classes=n_classes, cls_dropout=cls_dropout
+        )
         self.model.reset_weights(initialization_range)
+
+        if freeze_first_n_layers > 0:
+            assert (
+                freeze_first_n_layers < config["num_layers"]
+            ), "Number of layers to freeze should be less than total number of layers"
+
+            for i in range(freeze_first_n_layers):
+                for param in self.model.bert.encoder.layers[i].parameters():
+                    param.requires_grad = False
 
         self.lr = lr
         self.weight_decay = weight_decay
@@ -30,14 +45,28 @@ class LightningTokenClassification(L.LightningModule):
         self.save_hyperparameters()
 
         self.loss = nn.CrossEntropyLoss(ignore_index=ignore_index)
+        self.metrics = create_metrics(num_classes=n_classes)
 
     def training_step(self, batch: tuple[LongTensor, LongTensor, LongTensor], _):
-        # TODO: Implement training step
-        pass
+        inputs, labels, padding_mask = batch
+        logits = self.model(inputs, mask=padding_mask)
+        logits = einops.rearrange(logits, "b n v -> (b n) v")
+        loss = self.loss(logits, labels.flatten())
+
+        self.log("train_loss", loss, prog_bar=True)
+        self.log("lr", self.trainer.optimizers[0].param_groups[0]["lr"], prog_bar=True)
+        return loss
 
     def validation_step(self, batch: tuple[LongTensor, LongTensor, LongTensor], _):
-        # TODO: Implement validation step
-        pass
+        inputs, labels, padding_mask = batch
+        logits = self.model(inputs, mask=padding_mask)
+        logits = einops.rearrange(logits, "b n v -> (b n) v")
+        labels = labels.flatten()
+        loss = self.loss(logits, labels)
+
+        self.log("val_loss", loss, prog_bar=True)
+        self.log_dict(self.metrics(logits, labels))
+        return loss
 
     def configure_optimizers(self):  # pyright: ignore[reportIncompatibleMethodOverride]
         if isinstance(self.warmup_steps_or_ratio, float):

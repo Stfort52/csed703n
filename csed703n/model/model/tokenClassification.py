@@ -21,6 +21,7 @@ class BertTokenClassification(nn.Module):
         pe_strategy: str,
         pe_kwargs: dict,
         act_fn: str,
+        n_classes: int,
         cls_dropout: float,
     ):
         super(BertTokenClassification, self).__init__()
@@ -40,7 +41,7 @@ class BertTokenClassification(nn.Module):
         )
 
         # TODO: Implement token classification
-        self.cls = TokenClassification(d_model, n_vocab, cls_dropout)
+        self.cls = TokenClassification(d_model, n_classes, cls_dropout)
 
     def reset_weights(
         self, initialization_range: float = 0.02, reset_all: bool = False
