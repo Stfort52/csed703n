@@ -28,5 +28,9 @@ class SinusoidalRPE(BaseRPE):
         return self.pe[: x.size(1), : x.size(1)]
 
     @property
+    def coupled(self) -> bool:
+        return False
+
+    @property
     def max_len(self):
         return self._max_len

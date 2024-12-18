@@ -19,5 +19,9 @@ class TrainedRPE(BaseRPE):
         return self.pe(self.distances[: x.size(1), : x.size(1)])
 
     @property
+    def coupled(self) -> bool:
+        return True
+
+    @property
     def max_len(self) -> int:
         return self._max_len
