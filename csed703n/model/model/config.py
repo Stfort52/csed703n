@@ -12,3 +12,4 @@ class BertConfig(TypedDict):
     norm: Literal["pre", "post"]
     pe_strategy: str
     pe_kwargs: dict["str", Any]
+    act_fn: str

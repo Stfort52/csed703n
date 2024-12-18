@@ -17,6 +17,7 @@ class Encoder(nn.Module):
         norm: Literal["pre", "post"],
         relative_pe: str | None = None,
         relative_pe_kwargs: dict = {},
+        act_fn: str = "relu",
     ):
         super(Encoder, self).__init__()
         self.d_model = d_model
@@ -36,6 +37,7 @@ class Encoder(nn.Module):
                 norm=norm,
                 relative_pe=relative_pe,
                 relative_pe_kwargs=relative_pe_kwargs,
+                act_fn=act_fn,
             )
             for _ in range(num_layers)
         )

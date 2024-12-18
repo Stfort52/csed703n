@@ -22,6 +22,7 @@ class BertPretraining(nn.Module):
         norm: Literal["pre", "post"],
         pe_strategy: str,
         pe_kwargs: dict,
+        act_fn: str,
     ):
         super(BertPretraining, self).__init__()
         self.embedder = WordEmbedding(n_vocab, d_model, dropout_p=ff_dropout)
@@ -40,6 +41,7 @@ class BertPretraining(nn.Module):
             norm,
             pe_strategy,
             pe_kwargs,
+            act_fn,
         )
 
         self.lm = LanguageModeling(d_model, n_vocab)

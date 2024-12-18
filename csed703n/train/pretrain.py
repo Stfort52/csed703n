@@ -45,6 +45,7 @@ if __name__ == "__main__":
         norm="pre",
         pe_strategy="absolute-trained",
         pe_kwargs={"max_len": 2_048},
+        act_fn="relu",
     )
 
     model = LightningPretraining(config)
