@@ -1,4 +1,4 @@
-from typing import Literal, TypedDict
+from typing import Any, Literal, TypedDict
 
 
 class BertConfig(TypedDict):
@@ -11,4 +11,4 @@ class BertConfig(TypedDict):
     ff_dropout: float
     norm: Literal["pre", "post"]
     pe_strategy: str
-    pe_kwargs: dict
+    pe_kwargs: dict["str", Any]
