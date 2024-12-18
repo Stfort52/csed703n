@@ -1,7 +1,6 @@
 import einops
 from torch import LongTensor, Tensor, nn
 
-from ..pe import BaseRPE
 from ..utils import pe_from_name
 
 
@@ -31,7 +30,7 @@ class MHA(nn.Module):
         self.output_dropout = nn.Dropout(output_dropout)
 
         if relative_pe is not None:
-            relative_pe_kwargs.setdefault("embed_size", embed_size)
+            relative_pe_kwargs.setdefault("embed_size", self.head_dim)
             self.relative_pe = pe_from_name("relative", relative_pe)(
                 **relative_pe_kwargs
             )
