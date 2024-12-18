@@ -1,3 +1,4 @@
+import warnings
 from typing import Any, Literal
 
 from torch import LongTensor, Tensor, nn
@@ -53,6 +54,7 @@ class BertTokenClassification(nn.Module):
     ) -> None:
         if reset_all:
             reset_weights(self.bert, initialization_range)
+            warnings.warn("Resetting entire model including pretrained weights")
         reset_weights(self.cls, initialization_range)
 
     def forward(self, x: LongTensor, mask: LongTensor | None = None) -> Tensor:
