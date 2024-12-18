@@ -40,15 +40,21 @@ if __name__ == "__main__":
         num_heads=4,
         num_layers=6,
         d_ff=512,
-        attn_dropout=0.1,
-        ff_dropout=0.1,
-        norm="pre",
+        attn_dropout=0.02,
+        ff_dropout=0.02,
+        norm="post",
         pe_strategy="absolute-trained",
         pe_kwargs={"max_len": 2_048},
         act_fn="relu",
     )
 
-    model = LightningPretraining(config)
+    model = LightningPretraining(
+        config,
+        weight_decay=1e-3,
+        lr=1e-3,
+        warmup_steps_or_ratio=0.1,
+        lr_scheduler="linear",
+    )
 
     checkpoint_callback = EvenlySpacedModelCheckpoint(
         save_last="link", n_ckeckpoints=20
@@ -62,6 +68,10 @@ if __name__ == "__main__":
         max_epochs=1,
         strategy="ddp" if WORLD_SIZE > 1 else "auto",
         num_nodes=WORLD_SIZE,
+        gradient_clip_val=1.0,
     )
+
+    trainer.print("Start training")
+    trainer.print(repr(model))
 
     trainer.fit(model, data)
