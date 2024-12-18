@@ -1,4 +1,4 @@
-from typing import Literal, Type
+from typing import Literal, Type, overload
 
 from ..pe import *
 
@@ -14,5 +14,13 @@ MODEL_MAP = {
 }
 
 
-def pe_from_name(category: Literal["absolute", "relative"], name: str) -> Type[BasePE]:
+@overload
+def pe_from_name(category: Literal["absolute"], name: str) -> Type[BasePE]: ...
+
+
+@overload
+def pe_from_name(category: Literal["relative"], name: str) -> Type[BaseRPE]: ...
+
+
+def pe_from_name(category: str, name: str) -> Type[BasePE]:
     return MODEL_MAP[category][name]
