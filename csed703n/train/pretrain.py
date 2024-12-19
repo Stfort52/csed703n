@@ -21,10 +21,10 @@ if __name__ == "__main__":
     torch.set_float32_matmul_precision("high")
 
     WORLD_SIZE = int(os.getenv("WORLD_SIZE", 1))
-    BATCH_SIZE = 16
+    BATCH_SIZE = 32
     BATCH_PER_GPU = BATCH_SIZE // WORLD_SIZE
 
-    DATA_DIR = Path(__file__).parent.parent / "data"
+    DATA_DIR = Path(__file__).parent.parent.parent / "data"
 
     dataset_dir = DATA_DIR / "datasets/genecorpus_1M_2048.dataset"
     token_dict = pickle.load((DATA_DIR / "token_dictionary.pkl").open("rb"))
@@ -42,8 +42,12 @@ if __name__ == "__main__":
         attn_dropout=0.02,
         ff_dropout=0.02,
         norm="post",
-        pe_strategy="absolute-trained",
-        pe_kwargs={"max_len": 2_048},
+        tupe=False,
+        absolute_pe_strategy="trained",
+        absolute_pe_kwargs={"max_len": 2048},
+        relative_pe_strategy=None,
+        relative_pe_kwargs={},
+        relative_pe_shared=True,
         act_fn="relu",
     )
 
