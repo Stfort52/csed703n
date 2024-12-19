@@ -42,7 +42,7 @@ if __name__ == "__main__":
         attn_dropout=0.02,
         ff_dropout=0.02,
         norm="post",
-        tupe=False,
+        tupe=True,
         absolute_pe_strategy="trained",
         absolute_pe_kwargs={"max_len": 2048},
         relative_pe_strategy=None,
