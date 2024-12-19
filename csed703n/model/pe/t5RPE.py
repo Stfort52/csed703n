@@ -9,13 +9,13 @@ class T5RPE(BaseRPE):
     coupled = False
     shape = "h i j"
 
-    def __init__(self, n_heads: int, num_buckets: int, max_distance: int):
+    def __init__(self, num_heads: int, num_buckets: int, max_distance: int, **kwargs):
         super(T5RPE, self).__init__()
-        self.n_heads = n_heads
+        self.num_heads = num_heads
         self.num_buckets = num_buckets
         self.max_distance = max_distance
 
-        self.bias = nn.Embedding(num_buckets, n_heads)
+        self.bias = nn.Embedding(num_buckets, num_heads)
 
     def forward(self, x: LongTensor) -> Tensor:
         dist = torch.arange(x.size(1), device=x.device)
