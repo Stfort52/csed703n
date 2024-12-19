@@ -7,6 +7,7 @@ import lightning as L
 import numpy as np
 import pandas as pd
 import torch
+from lightning.pytorch.callbacks import ModelCheckpoint
 from lightning.pytorch.loggers import CSVLogger, TensorBoardLogger
 
 from csed703n.data.lightning import NerDataModule
@@ -52,12 +53,16 @@ if __name__ == "__main__":
         freeze_first_n_layers=0,
     )
 
+    checkpoint_callback = ModelCheckpoint(
+        monitor="val_loss", mode="min", every_n_epochs=1
+    )
     csv_logger = CSVLogger(save_dir, name=TASK_NAME)
     tb_logger = TensorBoardLogger(save_dir, name=TASK_NAME, version=csv_logger.version)
     trainer = L.Trainer(
         strategy="ddp" if WORLD_SIZE > 1 else "auto",
         max_epochs=5,
         logger=[csv_logger, tb_logger],
+        callbacks=[checkpoint_callback],
         num_nodes=WORLD_SIZE,
     )
     trainer.fit(model, data)
