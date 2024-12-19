@@ -14,6 +14,7 @@ MODEL_MAP = {
         "learned": TrainedRPE,  # alias
         "sinusoidal": SinusoidalRPE,
         "trigonometric": SinusoidalRPE,  # alias
+        "t5": T5RPE,
     },
 }
 
