@@ -5,6 +5,9 @@ from . import BaseRPE
 
 
 class SinusoidalRPE(BaseRPE):
+    coupled = True
+    shape = "i j d"
+
     def __init__(self, max_len, embed_size):
         super(SinusoidalRPE, self).__init__()
         self._max_len = max_len
@@ -26,10 +29,6 @@ class SinusoidalRPE(BaseRPE):
 
     def forward(self, x: LongTensor) -> Tensor:
         return self.pe[: x.size(1), : x.size(1)]
-
-    @property
-    def coupled(self) -> bool:
-        return False
 
     @property
     def max_len(self):

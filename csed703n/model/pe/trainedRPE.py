@@ -5,6 +5,9 @@ from . import BaseRPE
 
 
 class TrainedRPE(BaseRPE):
+    coupled = True
+    shape = "i j d"
+
     def __init__(self, max_len, embed_size):
         super(TrainedRPE, self).__init__()
         self._max_len = max_len
@@ -17,10 +20,6 @@ class TrainedRPE(BaseRPE):
 
     def forward(self, x: LongTensor) -> Tensor:
         return self.pe(self.distances[: x.size(1), : x.size(1)])
-
-    @property
-    def coupled(self) -> bool:
-        return True
 
     @property
     def max_len(self) -> int:
