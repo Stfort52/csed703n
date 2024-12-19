@@ -17,6 +17,7 @@ class Block(nn.Module):
         norm: Literal["pre", "post"],
         relative_pe: str | None = None,
         relative_pe_kwargs: dict = {},
+        relative_pe_shared: bool = False,
         ln_eps: float = 1e-12,
         act_fn: str = "relu",
     ):
@@ -35,6 +36,7 @@ class Block(nn.Module):
             ff_dropout,
             relative_pe,
             relative_pe_kwargs,
+            relative_pe_shared,
         )
         self.ln1 = nn.LayerNorm(embed_size, ln_eps)
 
@@ -47,13 +49,17 @@ class Block(nn.Module):
         self.ln2 = nn.LayerNorm(embed_size, ln_eps)
 
     def forward(
-        self, x: Tensor, mask: LongTensor | None = None, tupe_mtx: Tensor | None = None
+        self,
+        x: Tensor,
+        mask: LongTensor | None = None,
+        rpe_mtx: Tensor | None = None,
+        tupe_mtx: Tensor | None = None,
     ) -> Tensor:
         if self.norm == "pre":
-            x = x + self.attn(self.ln1(x), mask, tupe_mtx)
+            x = x + self.attn(self.ln1(x), mask, rpe_mtx, tupe_mtx)
             x = x + self.ff(self.ln2(x))
         elif self.norm == "post":
-            x = self.ln1(x + self.attn(x, mask, tupe_mtx))
+            x = self.ln1(x + self.attn(x, mask, rpe_mtx, tupe_mtx))
             x = self.ln2(x + self.ff(x))
         else:
             raise ValueError(":(")

@@ -25,4 +25,6 @@ class TupeBase(BertBase):
     def forward(self, x: LongTensor, mask: LongTensor | None = None) -> Tensor:
         p = self.tupe(self.absolute_pe(x))
         x = self.embedder(x)
-        return self.encoder(x, mask, p)
+        r = self.relative_pe(x) if self.relative_pe is not None else None
+
+        return self.encoder(x, mask, r, p)

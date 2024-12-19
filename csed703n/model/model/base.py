@@ -23,6 +23,7 @@ class BertBase(nn.Module):
         absolute_pe_kwargs: dict[str, Any] = {},
         relative_pe_strategy: str | None = None,
         relative_pe_kwargs: dict[str, Any] = {},
+        relative_pe_shared: bool = False,
         act_fn: str = "relu",
     ):
         super(BertBase, self).__init__()
@@ -40,6 +41,15 @@ class BertBase(nn.Module):
         else:
             self.absolute_pe = None
 
+        if relative_pe_strategy is not None and relative_pe_shared:
+            relative_pe_kwargs.setdefault("embed_size", d_model)
+            self.relative_pe = pe_from_name("relative", relative_pe_strategy)(
+                **relative_pe_kwargs
+            )
+            relative_pe_strategy = None
+        else:
+            self.relative_pe = None
+
         self.encoder = Encoder(
             d_model,
             num_heads,
@@ -50,6 +60,7 @@ class BertBase(nn.Module):
             norm,
             relative_pe_strategy,
             relative_pe_kwargs,
+            relative_pe_shared,
             act_fn,
         )
 
@@ -67,4 +78,8 @@ class BertBase(nn.Module):
             x = self.embedder(x) + self.absolute_pe(x)
         else:
             x = self.embedder(x)
-        return self.encoder(x, mask)
+
+        if self.relative_pe is not None:
+            return self.encoder(x, mask, self.relative_pe(x))
+        else:
+            return self.encoder(x, mask)

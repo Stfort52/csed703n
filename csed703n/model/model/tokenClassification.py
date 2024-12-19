@@ -24,6 +24,7 @@ class BertTokenClassification(nn.Module):
         absolute_pe_kwargs: dict[str, Any],
         relative_pe_strategy: str | None,
         relative_pe_kwargs: dict[str, Any],
+        relative_pe_shared: bool,
         act_fn: str,
         n_classes: int,
         cls_dropout: float,
@@ -44,6 +45,7 @@ class BertTokenClassification(nn.Module):
             absolute_pe_kwargs,
             relative_pe_strategy,
             relative_pe_kwargs,
+            relative_pe_shared,
             act_fn,
         )
 

@@ -13,6 +13,7 @@ class MHA(nn.Module):
         output_dropout: float = 0.0,
         relative_pe: str | None = None,
         relative_pe_kwargs: dict = {},
+        relative_pe_shared: bool = False,
     ):
         super(MHA, self).__init__()
 
@@ -20,6 +21,7 @@ class MHA(nn.Module):
         self.embed_size = embed_size
         self.num_heads = num_heads
         self.head_dim = embed_size // num_heads
+        self.relative_pe_shared = relative_pe_shared
 
         self.W_q = nn.Linear(embed_size, embed_size)
         self.W_k = nn.Linear(embed_size, embed_size)
@@ -30,17 +32,25 @@ class MHA(nn.Module):
         self.output_dropout = nn.Dropout(output_dropout)
 
         if relative_pe is not None:
-            relative_pe_kwargs.setdefault("embed_size", self.head_dim)
-            self.relative_pe = pe_from_name("relative", relative_pe)(
-                **relative_pe_kwargs
-            )
+            if self.relative_pe_shared:
+                self.relative_pe = pe_from_name("relative", relative_pe)
+                # RPE is shared, don't instantiate it here
+            else:
+                relative_pe_kwargs.setdefault("embed_size", self.head_dim)
+                self.relative_pe = pe_from_name("relative", relative_pe)(
+                    **relative_pe_kwargs
+                )
         else:
             self.relative_pe = None
 
         self.scale = self.head_dim**-0.5
 
     def forward(
-        self, x: Tensor, mask: LongTensor | None = None, tupe_mtx: Tensor | None = None
+        self,
+        x: Tensor,
+        mask: LongTensor | None = None,
+        rpe_mtx: Tensor | None = None,
+        tupe_mtx: Tensor | None = None,
     ) -> Tensor:
         Q = einops.rearrange(self.W_q(x), "b n (h d) -> b h n d", h=self.num_heads)
         K = einops.rearrange(self.W_k(x), "b n (h d) -> b h n d", h=self.num_heads)
@@ -52,9 +62,17 @@ class MHA(nn.Module):
             A += tupe_mtx.unsqueeze(0)  # [h i j]
 
         if self.relative_pe is not None:
-            P = self.relative_pe(x)  # [i j d]
+            if self.relative_pe_shared:
+                assert rpe_mtx is not None, "rpe_mtx needed for shared RPE"
+                P = rpe_mtx
+            else:
+                assert rpe_mtx is None, "rpe_mtx not needed for per-layer RPE"
+                P = self.relative_pe(x)
+
             if self.relative_pe.coupled:
-                A += einops.einsum(Q, P, "b h i d, i j d -> b h i j")
+                A += einops.einsum(
+                    Q, P, f"b h i d, {self.relative_pe.shape} -> b h i j"
+                )
             else:
                 A += P
 

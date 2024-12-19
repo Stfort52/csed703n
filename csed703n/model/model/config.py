@@ -15,4 +15,5 @@ class BertConfig(TypedDict):
     absolute_pe_kwargs: dict[str, Any]
     relative_pe_strategy: str | None
     relative_pe_kwargs: dict[str, Any]
+    relative_pe_shared: bool
     act_fn: str

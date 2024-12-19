@@ -17,6 +17,7 @@ class Encoder(nn.Module):
         norm: Literal["pre", "post"],
         relative_pe: str | None,
         relative_pe_kwargs: dict,
+        relative_pe_shared: bool,
         act_fn: str,
     ):
         super(Encoder, self).__init__()
@@ -37,15 +38,20 @@ class Encoder(nn.Module):
                 norm=norm,
                 relative_pe=relative_pe,
                 relative_pe_kwargs=relative_pe_kwargs,
+                relative_pe_shared=relative_pe_shared,
                 act_fn=act_fn,
             )
             for _ in range(num_layers)
         )
 
     def forward(
-        self, x: Tensor, mask: LongTensor | None = None, tupe_mtx: Tensor | None = None
+        self,
+        x: Tensor,
+        mask: LongTensor | None = None,
+        rpe_mtx: Tensor | None = None,
+        tupe_mtx: Tensor | None = None,
     ) -> Tensor:
         for layer in self.layers:
-            x = layer(x, mask, tupe_mtx)
+            x = layer(x, mask, rpe_mtx, tupe_mtx)
 
         return x

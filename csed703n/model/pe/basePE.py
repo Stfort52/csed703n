@@ -14,6 +14,5 @@ class BasePE(nn.Module, ABC):
 
 
 class BaseRPE(BasePE):
-    @property
-    @abstractmethod
-    def coupled(self) -> bool: ...
+    coupled: bool
+    shape: str

@@ -23,6 +23,7 @@ class BertPretraining(nn.Module):
         absolute_pe_kwargs: dict[str, Any],
         relative_pe_strategy: str | None,
         relative_pe_kwargs: dict[str, Any],
+        relative_pe_shared: bool,
         act_fn: str,
     ):
         super(BertPretraining, self).__init__()
@@ -41,6 +42,7 @@ class BertPretraining(nn.Module):
             absolute_pe_kwargs,
             relative_pe_strategy,
             relative_pe_kwargs,
+            relative_pe_shared,
             act_fn,
         )
 
