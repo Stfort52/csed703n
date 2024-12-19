@@ -8,7 +8,7 @@ class SinusoidalRPE(BaseRPE):
     coupled = True
     shape = "i j d"
 
-    def __init__(self, max_len, embed_size):
+    def __init__(self, max_len: int, embed_size: int):
         super(SinusoidalRPE, self).__init__()
         self._max_len = max_len
 

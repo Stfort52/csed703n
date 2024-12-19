@@ -8,7 +8,7 @@ class TrainedRPE(BaseRPE):
     coupled = True
     shape = "i j d"
 
-    def __init__(self, max_len, embed_size):
+    def __init__(self, max_len: int, embed_size: int):
         super(TrainedRPE, self).__init__()
         self._max_len = max_len
         self.pe = nn.Embedding(2 * max_len - 1, embed_size)

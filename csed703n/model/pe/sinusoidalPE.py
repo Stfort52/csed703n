@@ -5,7 +5,7 @@ from . import BasePE
 
 
 class SinusoidalPE(BasePE):
-    def __init__(self, max_len, embed_size):
+    def __init__(self, max_len: int, embed_size: int):
         super(SinusoidalPE, self).__init__()
 
         # precompute the sin and cos values

@@ -74,7 +74,7 @@ class MHA(nn.Module):
                     Q, P, f"b h i d, {self.relative_pe.shape} -> b h i j"
                 )
             else:
-                A += P
+                A += P  # [h i j] or [i j]
 
         # mask: [b j] -> [b 1 1 j]
         if mask is not None:

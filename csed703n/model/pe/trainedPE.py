@@ -5,7 +5,7 @@ from .basePE import BasePE
 
 
 class TrainedPE(BasePE):
-    def __init__(self, max_len, embed_size):
+    def __init__(self, max_len: int, embed_size: int):
         super(TrainedPE, self).__init__()
         self.pe = nn.Embedding(max_len, embed_size)
 
