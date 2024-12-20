@@ -42,11 +42,11 @@ class BertBase(nn.Module):
             self.absolute_pe = None
 
         if relative_pe_strategy is not None and relative_pe_shared:
-            relative_pe_kwargs.setdefault("embed_size", d_model)
+            assert d_model % num_heads == 0, ":("
+            relative_pe_kwargs.setdefault("embed_size", d_model // num_heads)
             self.relative_pe = pe_from_name("relative", relative_pe_strategy)(
                 **relative_pe_kwargs
             )
-            relative_pe_strategy = None
         else:
             self.relative_pe = None
 

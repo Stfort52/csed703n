@@ -25,7 +25,7 @@ class T5RPE(BaseRPE):
             dist, True, self.num_buckets, self.max_distance
         )
 
-        return self.bias(buckets)
+        return self.bias(buckets).permute(2, 0, 1)  # [i j h] -> [h i j]
 
     @property
     def max_len(self) -> None:
