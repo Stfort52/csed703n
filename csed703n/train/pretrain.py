@@ -45,8 +45,8 @@ if __name__ == "__main__":
         tupe=True,
         absolute_pe_strategy="trained",
         absolute_pe_kwargs={"max_len": 2048},
-        relative_pe_strategy="t5",
-        relative_pe_kwargs={"num_heads": 4, "num_buckets": 256, "max_distance": 512},
+        relative_pe_strategy="trained",
+        relative_pe_kwargs={"max_len": 2048},
         relative_pe_shared=True,
         act_fn="relu",
     )
