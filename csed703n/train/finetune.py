@@ -80,7 +80,7 @@ if __name__ == "__main__":
     from itertools import product
 
     seeds = [42, 424, 4242, 42424, 424242]
-    versions = [0, 1, 2, 3, 4, 5]
+    versions = [6]
 
     for version, seed in product(versions, seeds):
         print(f"Version: {version}, Seed: {seed}")
