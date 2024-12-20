@@ -5,11 +5,6 @@ initialization_range: 0.02
 lr: 5.0e-05
 lr_scheduler: linear
 model_path_or_config: !!python/object/apply:pathlib.PosixPath
-- /
-- home
-- baekjh
-- class
-- csed703n
 - checkpoints
 - lightning_logs
 - version_6
