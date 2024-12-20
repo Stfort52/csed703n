@@ -13,11 +13,12 @@ from lightning.pytorch.loggers import CSVLogger, TensorBoardLogger
 from csed703n.data.lightning import NerDataModule
 from csed703n.model.lightning import LightningTokenClassification
 
-if __name__ == "__main__":
-    torch.random.manual_seed(42)
-    torch.cuda.manual_seed_all(42)
-    np.random.seed(42)
-    random.seed(42)
+
+def main(version: int, seed: int = 42):
+    torch.random.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
+    np.random.seed(seed)
+    random.seed(seed)
     torch.set_float32_matmul_precision("high")
 
     WORLD_SIZE = int(os.getenv("WORLD_SIZE", 1))
@@ -25,7 +26,7 @@ if __name__ == "__main__":
     BATCH_PER_GPU = BATCH_SIZE // WORLD_SIZE
 
     DATA_DIR = Path(__file__).parent.parent.parent / "data"
-    MODEL_DIR = DATA_DIR.parent / f"checkpoints/lightning_logs/version_{2}"
+    MODEL_DIR = DATA_DIR.parent / f"checkpoints/lightning_logs/version_{version}"
     TASK_NAME = "bivalent_gene_prediction"
 
     labels = pd.read_csv(DATA_DIR / "is_bivalent.csv").set_index("id")["H3K27me3"]
@@ -38,6 +39,8 @@ if __name__ == "__main__":
         token_dict=token_dict,
         entity_labels=labels,
         batch_size=BATCH_PER_GPU,
+        dataset_shuffle=42,
+        label_shuffle=42,
     )
 
     ckpt_dir = MODEL_DIR / "checkpoints" / "last.ckpt"
@@ -60,9 +63,25 @@ if __name__ == "__main__":
     tb_logger = TensorBoardLogger(save_dir, name=TASK_NAME, version=csv_logger.version)
     trainer = L.Trainer(
         strategy="ddp" if WORLD_SIZE > 1 else "auto",
-        max_epochs=5,
+        max_epochs=3,
         logger=[csv_logger, tb_logger],
         callbacks=[checkpoint_callback],
         num_nodes=WORLD_SIZE,
     )
     trainer.fit(model, data)
+
+    # load best checkpoint
+    best_model = LightningTokenClassification.load_from_checkpoint(
+        checkpoint_callback.best_model_path
+    )
+
+
+if __name__ == "__main__":
+    from itertools import product
+
+    seeds = [42, 424, 4242, 42424, 424242]
+    versions = [0, 1, 2, 3, 4, 5]
+
+    for version, seed in product(versions, seeds):
+        print(f"Version: {version}, Seed: {seed}")
+        main(version, seed)
