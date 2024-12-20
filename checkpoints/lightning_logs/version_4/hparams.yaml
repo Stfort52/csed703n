@@ -1,0 +1,26 @@
+config:
+  absolute_pe_kwargs: {}
+  absolute_pe_strategy: null
+  act_fn: relu
+  attn_dropout: 0.02
+  d_ff: 512
+  d_model: 256
+  ff_dropout: 0.02
+  n_vocab: 25426
+  norm: post
+  num_heads: 4
+  num_layers: 6
+  relative_pe_kwargs:
+    embed_size: 64
+    max_distance: 512
+    num_buckets: 256
+    num_heads: 4
+  relative_pe_shared: true
+  relative_pe_strategy: t5
+  tupe: false
+ignore_index: -100
+initialization_range: 0.02
+lr: 0.001
+lr_scheduler: linear
+warmup_steps_or_ratio: 0.1
+weight_decay: 0.001
