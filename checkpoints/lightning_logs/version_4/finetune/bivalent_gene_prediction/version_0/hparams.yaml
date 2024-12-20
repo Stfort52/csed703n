@@ -1,0 +1,15 @@
+cls_dropout: 0.0
+freeze_first_n_layers: 0
+ignore_index: -100
+initialization_range: 0.02
+lr: 5.0e-05
+lr_scheduler: linear
+model_path_or_config: !!python/object/apply:pathlib.PosixPath
+- checkpoints
+- lightning_logs
+- version_4
+- checkpoints
+- last.ckpt
+n_classes: 2
+warmup_steps_or_ratio: 0.1
+weight_decay: 0.001
