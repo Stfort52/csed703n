@@ -42,12 +42,12 @@ if __name__ == "__main__":
         attn_dropout=0.02,
         ff_dropout=0.02,
         norm="post",
-        tupe=True,
-        absolute_pe_strategy="trained",
-        absolute_pe_kwargs={"max_len": 2048},
-        relative_pe_strategy=None,
-        relative_pe_kwargs={},
-        relative_pe_shared=True,
+        tupe=False,
+        absolute_pe_strategy=None,
+        absolute_pe_kwargs={},
+        relative_pe_strategy="trained",
+        relative_pe_kwargs={"max_len": 2048},
+        relative_pe_shared=False,
         act_fn="relu",
     )
 
