@@ -27,11 +27,13 @@ def main(version: int, seed: int = 42):
 
     DATA_DIR = Path(__file__).parent.parent.parent / "data"
     MODEL_DIR = DATA_DIR.parent / f"checkpoints/lightning_logs/version_{version}"
-    TASK_NAME = "bivalent_gene_prediction"
+    TASK_NAME = "tf_range_prediction"
 
-    labels = pd.read_csv(DATA_DIR / "is_bivalent.csv").set_index("id")["H3K27me3"]
+    labels = pd.read_csv(DATA_DIR / "is_longrange_tf.csv").set_index("id")[
+        "is_longrange"
+    ]
 
-    dataset_dir = DATA_DIR / "datasets/panglao_SRA553822-SRS2119548.dataset"
+    dataset_dir = DATA_DIR / "datasets/iCM_diff_dropseq.dataset"
     token_dict = pickle.load((DATA_DIR / "token_dictionary.pkl").open("rb"))
 
     data = NerDataModule(

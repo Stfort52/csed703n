@@ -19,11 +19,13 @@ It's highly recommended to use a virtual environment. To also install the dev de
 Clone the [Genecorpus-30M](https://huggingface.co/datasets/ctheodoris/Genecorpus-30M) repository to get the data.
 You'll likely need git-lfs to clone the repository.
 Then, set up a symlink to the required files in the data directory like below:
+You should be able to easily locate the required files in the GeneCorpus-30M repository.
 
 ```bash
 data
 ├── datasets
 │   ├── genecorpus_30M_2048.dataset -> /path/to/30M/dataset
+│   ├── iCM_diff_dropseq.dataset -> /path/to/dropseq/dataset
 │   └── panglao_SRA553822-SRS2119548.dataset -> /path/to/panglao/dataset
 ├── is_bivalent.csv
 └── token_dictionary.pkl -> /path/to/token/dictionary
