@@ -47,7 +47,7 @@ if __name__ == "__main__":
         absolute_pe_kwargs={},
         relative_pe_strategy="trained",
         relative_pe_kwargs={"max_len": 2048},
-        relative_pe_shared=False,
+        relative_pe_shared=True,
         act_fn="relu",
     )
 
