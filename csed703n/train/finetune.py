@@ -27,13 +27,11 @@ def main(version: int, seed: int = 42):
 
     DATA_DIR = Path(__file__).parent.parent.parent / "data"
     MODEL_DIR = DATA_DIR.parent / f"checkpoints/lightning_logs/version_{version}"
-    TASK_NAME = "tf_range_prediction"
+    TASK_NAME = "bivalent_gene_prediction"
 
-    labels = pd.read_csv(DATA_DIR / "is_longrange_tf.csv").set_index("id")[
-        "is_longrange"
-    ]
+    labels = pd.read_csv(DATA_DIR / "is_bivalent.csv").set_index("id")["H3K27me3"]
 
-    dataset_dir = DATA_DIR / "datasets/iCM_diff_dropseq.dataset"
+    dataset_dir = DATA_DIR / "datasets/panglao_SRA553822-SRS2119548.dataset"
     token_dict = pickle.load((DATA_DIR / "token_dictionary.pkl").open("rb"))
 
     data = NerDataModule(
@@ -72,17 +70,12 @@ def main(version: int, seed: int = 42):
     )
     trainer.fit(model, data)
 
-    # load best checkpoint
-    best_model = LightningTokenClassification.load_from_checkpoint(
-        checkpoint_callback.best_model_path
-    )
-
 
 if __name__ == "__main__":
     from itertools import product
 
     seeds = [42, 424, 4242, 42424, 424242]
-    versions = [6]
+    versions = [7]
 
     for version, seed in product(versions, seeds):
         print(f"Version: {version}, Seed: {seed}")
