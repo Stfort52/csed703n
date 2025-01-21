@@ -7,3 +7,4 @@ class Cell(TypedDict):
     input_ids: LongTensor
     length: int
     gene_labels: NotRequired[LongTensor]
+    cell_label: NotRequired[int]
