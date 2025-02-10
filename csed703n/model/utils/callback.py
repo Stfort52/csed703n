@@ -5,7 +5,7 @@ from lightning.pytorch.utilities import rank_zero_warn
 
 
 class EvenlySpacedModelCheckpoint(ModelCheckpoint):
-    def __init__(self, *args, n_ckeckpoints: int = 10, **kwargs):
+    def __init__(self, *args, n_checkpoints: int = 10, **kwargs):
         assert "every_n_epochs" not in kwargs
         assert "every_n_steps" not in kwargs
         assert "train_time_interval" not in kwargs
@@ -13,7 +13,7 @@ class EvenlySpacedModelCheckpoint(ModelCheckpoint):
         kwargs.setdefault("save_top_k", -1)
         super().__init__(*args, **kwargs)
 
-        self.n_ckeckpoints = n_ckeckpoints
+        self.n_checkpoints = n_checkpoints
 
     def setup(self, trainer: L.Trainer, *args, **kwargs):
         total_steps = (
@@ -22,14 +22,14 @@ class EvenlySpacedModelCheckpoint(ModelCheckpoint):
             else int(trainer.estimated_stepping_batches)
         )
 
-        if self.n_ckeckpoints > total_steps:
-            self.n_ckeckpoints = total_steps
+        if self.n_checkpoints > total_steps:
+            self.n_checkpoints = total_steps
             rank_zero_warn(
-                f"n_ckeckpoints is larger than total_steps. Setting to {total_steps}"
+                f"n_checkpoints is larger than total_steps. Setting to {total_steps}"
             )
 
         self.steps_to_save = self._calculate_steps_to_save(
-            total_steps, self.n_ckeckpoints
+            total_steps, self.n_checkpoints
         )
 
         super().setup(trainer, *args, **kwargs)
@@ -42,7 +42,7 @@ class EvenlySpacedModelCheckpoint(ModelCheckpoint):
         if self._should_skip_saving_checkpoint(trainer):
             return
 
-        if self.current_checkpoint_index >= self.n_ckeckpoints:
+        if self.current_checkpoint_index >= self.n_checkpoints:
             return
 
         if trainer.global_step >= self.steps_to_save[self.current_checkpoint_index]:
